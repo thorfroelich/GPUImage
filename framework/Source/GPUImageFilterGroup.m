@@ -57,6 +57,11 @@
 
 - (void)prepareForImageCapture;
 {
+    for (GPUImageFilter *f in self.initialFilters)
+    {
+        [f prepareForImageCapture];
+    }
+    
     [self.terminalFilter prepareForImageCapture];
 }
 
