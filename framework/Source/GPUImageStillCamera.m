@@ -93,6 +93,32 @@ void GPUImageCreateResizedSampleBuffer(CVPixelBufferRef cameraFrame, CGSize fina
     return;
 }*/
 
+- (void)capturePhotoAsImageWithCompletionHandler:(void (^)(UIImage *capturedImage, NSError *error))block
+{
+    [photoOutput captureStillImageAsynchronouslyFromConnection:[[photoOutput connections] objectAtIndex:0] completionHandler:^(CMSampleBufferRef imageSampleBuffer, NSError *error) {
+        UIImage *capturedImage = nil;
+        if (imageSampleBuffer != NULL) {
+            CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(imageSampleBuffer);
+            CVPixelBufferLockBaseAddress(imageBuffer, 0);
+            uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(imageBuffer);
+            size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+            size_t width = CVPixelBufferGetWidth(imageBuffer);
+            size_t height = CVPixelBufferGetHeight(imageBuffer);
+            CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+            CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+            CGContextRef context = CGBitmapContextCreate(baseAddress, width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+            CGImageRef cgImage = CGBitmapContextCreateImage(context);
+            capturedImage = [UIImage imageWithCGImage:cgImage scale:1.0 orientation:UIImageOrientationRight];
+            CGContextRelease(context);
+            CGColorSpaceRelease(colorSpace);
+            CGImageRelease(cgImage);
+        }
+        block(capturedImage, error);
+    }];
+    
+    return;
+}
+
 - (void)capturePhotoAsImageProcessedUpToFilter:(GPUImageOutput<GPUImageInput> *)finalFilterInChain withCompletionHandler:(void (^)(UIImage *processedImage, NSError *error))block;
 {
     [photoOutput captureStillImageAsynchronouslyFromConnection:[[photoOutput connections] objectAtIndex:0] completionHandler:^(CMSampleBufferRef imageSampleBuffer, NSError *error) {
