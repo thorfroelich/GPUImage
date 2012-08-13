@@ -80,16 +80,16 @@
 //    NSLog(@"Core Graphics drawing time: %f", elapsedTime);
 
     glBindTexture(GL_TEXTURE_2D, outputTexture);
-    if (self.shouldSmoothlyScaleOutput)
-    {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    }
+//    if (self.shouldSmoothlyScaleOutput)
+//    {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//    }
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)pixelSizeToUseForTexture.width, (int)pixelSizeToUseForTexture.height, 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
     
-    if (self.shouldSmoothlyScaleOutput)
-    {
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
+//    if (self.shouldSmoothlyScaleOutput)
+//    {
+//        glGenerateMipmap(GL_TEXTURE_2D);
+//    }
 
     if (shouldRedrawUsingCoreGraphics)
     {
