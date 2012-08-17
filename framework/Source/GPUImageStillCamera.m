@@ -1,6 +1,7 @@
 // 2448x3264 pixel image = 31,961,088 bytes for uncompressed RGBA
 
 #import "GPUImageStillCamera.h"
+#import <ImageIO/ImageIO.h>
 
 void GPUImageCreateResizedSampleBuffer(CVPixelBufferRef cameraFrame, CGSize finalSize, CMSampleBufferRef *sampleBuffer, GLubyte **imageData)
 {
@@ -108,7 +109,28 @@ void GPUImageCreateResizedSampleBuffer(CVPixelBufferRef cameraFrame, CGSize fina
             CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
             CGContextRef context = CGBitmapContextCreate(baseAddress, width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
             CGImageRef cgImage = CGBitmapContextCreateImage(context);
-            capturedImage = [UIImage imageWithCGImage:cgImage scale:1.0 orientation:UIImageOrientationRight];
+            
+            UIDeviceOrientation deviceOrientation = [[UIDevice currentDevice] orientation];
+            UIImageOrientation imageOrientation = UIImageOrientationLeft;
+            switch (deviceOrientation)
+            {
+                default:
+                case UIDeviceOrientationPortrait:
+                    imageOrientation = UIImageOrientationRight;
+                    break;
+                case UIDeviceOrientationPortraitUpsideDown:
+                    imageOrientation = UIImageOrientationLeft;
+                    break;
+                case UIDeviceOrientationLandscapeLeft:
+                    imageOrientation = UIImageOrientationUp;
+                    break;
+                case UIDeviceOrientationLandscapeRight:
+                    imageOrientation = UIImageOrientationDown;
+                    break;
+            }
+
+            
+            capturedImage = [UIImage imageWithCGImage:cgImage scale:1.0 orientation:imageOrientation];
             CGContextRelease(context);
             CGColorSpaceRelease(colorSpace);
             CGImageRelease(cgImage);
