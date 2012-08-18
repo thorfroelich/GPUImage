@@ -94,11 +94,19 @@ void GPUImageCreateResizedSampleBuffer(CVPixelBufferRef cameraFrame, CGSize fina
     return;
 }*/
 
-- (void)capturePhotoAsImageWithCompletionHandler:(void (^)(UIImage *capturedImage, NSError *error))block
+- (void)capturePhotoAsImageWithCompletionHandler:(void (^)(UIImage *capturedImage, NSDictionary *metadata, NSError *error))block
 {
     [photoOutput captureStillImageAsynchronouslyFromConnection:[[photoOutput connections] objectAtIndex:0] completionHandler:^(CMSampleBufferRef imageSampleBuffer, NSError *error) {
+        
         UIImage *capturedImage = nil;
-        if (imageSampleBuffer != NULL) {
+        NSDictionary *metadata = nil;
+        
+        if (imageSampleBuffer != NULL)
+        {
+            CFDictionaryRef metadataDictCF = CMCopyDictionaryOfAttachments(NULL, imageSampleBuffer, kCMAttachmentMode_ShouldPropagate);
+            metadata = [[NSDictionary alloc] initWithDictionary:(__bridge NSDictionary*)metadataDictCF];
+            CFRelease(metadataDictCF);
+            
             CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(imageSampleBuffer);
             CVPixelBufferLockBaseAddress(imageBuffer, 0);
             uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(imageBuffer);
@@ -135,7 +143,8 @@ void GPUImageCreateResizedSampleBuffer(CVPixelBufferRef cameraFrame, CGSize fina
             CGColorSpaceRelease(colorSpace);
             CGImageRelease(cgImage);
         }
-        block(capturedImage, error);
+        
+        block(capturedImage, metadata, error);
     }];
     
     return;
