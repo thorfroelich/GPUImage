@@ -107,8 +107,6 @@ void GPUImageCreateResizedSampleBuffer(CVPixelBufferRef cameraFrame, CGSize fina
             metadata = [[NSDictionary alloc] initWithDictionary:(__bridge NSDictionary*)metadataDictCF];
             CFRelease(metadataDictCF);
             
-            SLLog(@"%@", metadata.description);
-            
             CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(imageSampleBuffer);
             CVPixelBufferLockBaseAddress(imageBuffer, 0);
             uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(imageBuffer);
